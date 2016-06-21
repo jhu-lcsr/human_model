@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="firefighter">
+
+  <!-- The arm's zero configuration is outstretched horizontally, then
+       directions correspond to an upright person -->
+
+  <xacro:property name="PI" value="3.14159265359"/>
+
+  <link name="shoulder_base">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://nonredundant_human_arm/hemisphere.stl" scale="0.1 0.1 0.1"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <!-- Adduction -->
+  <joint name="shoulder_horizontal" type="continuous">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="shoulder_base"/>
+    <child link="shoulder"/>
+  </joint>
+
+  <link name="shoulder">
+  </link>
+
+  <!-- Abduction -->
+  <joint name="shoulder_vertical" type="continuous">
+    <origin xyz="0 0 0" rpy="0 ${-PI/2.0} 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="shoulder"/>
+    <child link="upper_arm"/>
+  </joint>
+
+  <link name="upper_arm">
+  </link>
+
+  <!-- Supination and Pronation -->
+  <joint name="axial" type="continuous">
+    <origin xyz="0 0 0" rpy="${PI/2.0} 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="upper_arm"/>
+    <child link="lower_arm"/>
+  </joint>
+
+  <link name="lower_arm">
+  </link>
+
+  <!-- Arm Extension -->
+  <joint name="extension" type="prismatic">
+    <axis xyz="0 0 1"/>
+    <parent link="lower_arm"/>
+    <child link="wrist_base"/>
+    <limit lower="0.05" upper="1.0" velocity="1" effort="10"/>
+  </joint>
+
+  <link name="wrist_base">
+  </link>
+
+  <!-- Flexion and Extension -->
+  <joint name="wrist_vertical" type="continuous">
+    <origin xyz="0 0 0" rpy="${PI/2.0} 0 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="wrist_base"/>
+    <child link="wrist"/>
+  </joint>
+
+  <link name="wrist">
+  </link>
+
+  <!-- Ulnar Deviation and Radial Deviation  -->
+  <joint name="wrist_horizontal" type="continuous">
+    <origin xyz="0 0 0" rpy="0 ${PI/2.0} 0"/>
+    <axis xyz="0 0 1"/>
+    <parent link="wrist"/>
+    <child link="hand"/>
+  </joint>
+
+  <link name="hand">
+  </link>
+
+</robot>
