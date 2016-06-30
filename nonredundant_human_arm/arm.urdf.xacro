@@ -1,84 +1,142 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="firefighter">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <!-- The arm's zero configuration is outstretched horizontally, then
        directions correspond to an upright person -->
 
   <xacro:property name="PI" value="3.14159265359"/>
 
-  <link name="shoulder_base">
-    <visual>
+  <xacro:macro name="human_arm" params="prefix">
+    <link name="${prefix}shoulder_base">
+      <visual>
+        <origin xyz="0 0 0" rpy="${PI/2.0} 0 0"/>
+        <geometry>
+          <mesh filename="package://nonredundant_human_arm/hemisphere.stl" scale="0.1 0.1 0.1"/>
+        </geometry>
+        <material name="c1">
+          <color rgba="0.5 0.5 0.5 1.0"/>
+        </material>
+      </visual>
+    </link>
+
+    <!-- Adduction -->
+    <joint name="${prefix}shoulder_horizontal" type="continuous">
       <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-        <mesh filename="package://nonredundant_human_arm/hemisphere.stl" scale="0.1 0.1 0.1"/>
-      </geometry>
-    </visual>
-  </link>
+      <axis xyz="0 0 1"/>
+      <parent link="${prefix}shoulder_base"/>
+      <child link="${prefix}shoulder"/>
+      <limit lower="${-2*PI}" upper="${2*PI}" velocity="1" effort="10"/>
+    </joint>
 
-  <!-- Adduction -->
-  <joint name="shoulder_horizontal" type="continuous">
-    <origin xyz="0 0 0" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <parent link="shoulder_base"/>
-    <child link="shoulder"/>
-  </joint>
+    <link name="${prefix}shoulder">
+      <visual>
+        <origin xyz="0 0 0" rpy="${PI/2.0} 0 0"/>
+        <geometry>
+          <mesh filename="package://nonredundant_human_arm/hemisphere.stl" scale="0.09 0.09 0.09"/>
+        </geometry>
+        <material name="c2">
+          <color rgba="1.0 0.5 0.5 1.0"/>
+        </material>
+      </visual>
+    </link>
 
-  <link name="shoulder">
-  </link>
+    <!-- Abduction -->
+    <joint name="${prefix}shoulder_vertical" type="continuous">
+      <origin xyz="0 0 0" rpy="0 ${-PI/2.0} 0"/>
+      <axis xyz="0 0 1"/>
+      <parent link="${prefix}shoulder"/>
+      <child link="${prefix}upper_arm"/>
+      <limit lower="${-2*PI}" upper="${2*PI}" velocity="1" effort="10"/>
+    </joint>
 
-  <!-- Abduction -->
-  <joint name="shoulder_vertical" type="continuous">
-    <origin xyz="0 0 0" rpy="0 ${-PI/2.0} 0"/>
-    <axis xyz="0 0 1"/>
-    <parent link="shoulder"/>
-    <child link="upper_arm"/>
-  </joint>
+    <link name="${prefix}upper_arm">
+      <visual>
+        <origin xyz="0 0 0" rpy="${PI/2.0} 0 0"/>
+        <geometry>
+          <mesh filename="package://nonredundant_human_arm/hemisphere.stl" scale="0.08 0.08 0.08"/>
+        </geometry>
+        <material name="c3">
+          <color rgba="0.5 1.0 0.5 1.0"/>
+        </material>
+      </visual>
+    </link>
 
-  <link name="upper_arm">
-  </link>
+    <!-- Supination and Pronation -->
+    <joint name="${prefix}axial" type="continuous">
+      <origin xyz="0 0 0" rpy="${PI/2.0} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <parent link="${prefix}upper_arm"/>
+      <child link="${prefix}lower_arm"/>
+      <limit lower="${-2*PI}" upper="${2*PI}" velocity="1" effort="10"/>
+    </joint>
 
-  <!-- Supination and Pronation -->
-  <joint name="axial" type="continuous">
-    <origin xyz="0 0 0" rpy="${PI/2.0} 0 0"/>
-    <axis xyz="0 0 1"/>
-    <parent link="upper_arm"/>
-    <child link="lower_arm"/>
-  </joint>
+    <link name="${prefix}lower_arm">
+      <visual>
+        <origin xyz="0 0 0.5" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.05 0.03 1.0"/>
+        </geometry>
+        <material name="c4">
+          <color rgba="0.5 0.5 1.0 0.5"/>
+        </material>
+      </visual>
+    </link>
 
-  <link name="lower_arm">
-  </link>
+    <!-- Arm Extension -->
+    <joint name="${prefix}extension" type="prismatic">
+      <axis xyz="0 0 1"/>
+      <parent link="${prefix}lower_arm"/>
+      <child link="${prefix}wrist_base"/>
+      <limit lower="0.05" upper="1.0" velocity="1" effort="10"/>
+    </joint>
 
-  <!-- Arm Extension -->
-  <joint name="extension" type="prismatic">
-    <axis xyz="0 0 1"/>
-    <parent link="lower_arm"/>
-    <child link="wrist_base"/>
-    <limit lower="0.05" upper="1.0" velocity="1" effort="10"/>
-  </joint>
+    <link name="${prefix}wrist_base">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://nonredundant_human_arm/hemisphere.stl" scale="0.07 0.07 0.07"/>
+        </geometry>
+        <material name="c1"/>
+      </visual>
+    </link>
 
-  <link name="wrist_base">
-  </link>
+    <!-- Flexion and Extension -->
+    <joint name="${prefix}wrist_vertical" type="continuous">
+      <origin xyz="0 0 0" rpy="${PI/2.0} 0 0"/>
+      <axis xyz="0 0 1"/>
+      <parent link="${prefix}wrist_base"/>
+      <child link="${prefix}wrist"/>
+      <limit lower="${-2*PI}" upper="${2*PI}" velocity="1" effort="10"/>
+    </joint>
 
-  <!-- Flexion and Extension -->
-  <joint name="wrist_vertical" type="continuous">
-    <origin xyz="0 0 0" rpy="${PI/2.0} 0 0"/>
-    <axis xyz="0 0 1"/>
-    <parent link="wrist_base"/>
-    <child link="wrist"/>
-  </joint>
+    <link name="${prefix}wrist">
+      <visual>
+        <origin xyz="0 0 0" rpy="${-PI/2.0} 0 0"/>
+        <geometry>
+          <mesh filename="package://nonredundant_human_arm/hemisphere.stl" scale="0.06 0.06 0.06"/>
+        </geometry>
+        <material name="c2"/>
+      </visual>
+    </link>
 
-  <link name="wrist">
-  </link>
+    <!-- Ulnar Deviation and Radial Deviation  -->
+    <joint name="${prefix}wrist_horizontal" type="continuous">
+      <origin xyz="0 0 0" rpy="0 ${PI/2.0} 0"/>
+      <axis xyz="0 0 1"/>
+      <parent link="${prefix}wrist"/>
+      <child link="${prefix}hand"/>
+      <limit lower="${-2*PI}" upper="${2*PI}" velocity="1" effort="10"/>
+    </joint>
 
-  <!-- Ulnar Deviation and Radial Deviation  -->
-  <joint name="wrist_horizontal" type="continuous">
-    <origin xyz="0 0 0" rpy="0 ${PI/2.0} 0"/>
-    <axis xyz="0 0 1"/>
-    <parent link="wrist"/>
-    <child link="hand"/>
-  </joint>
-
-  <link name="hand">
-  </link>
+    <link name="${prefix}hand">
+      <visual>
+        <origin xyz="0 0 0" rpy="${-PI/2.0} 0 0"/>
+        <geometry>
+          <mesh filename="package://nonredundant_human_arm/hemisphere.stl" scale="0.05 0.05 0.05"/>
+        </geometry>
+        <material name="c3"/>
+      </visual>
+    </link>
+  </xacro:macro>
 
 </robot>
